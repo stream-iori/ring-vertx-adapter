@@ -8,6 +8,7 @@
 
   :profiles
   {:dev {:dependencies [[org.clojure/clojure "1.5.1"]
+                        [compojure "1.1.5"]
                         [io.vertx/vertx-platform "2.0.0-final"]
                         [io.vertx/vertx-core "2.0.0-final"]
                         [clj-http "0.6.4"]]}})
