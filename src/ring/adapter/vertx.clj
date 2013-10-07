@@ -91,7 +91,7 @@
      :content-type       (get-content-type header)
      :content-length     (or (.length data) nil)
      :character-encoding (get-char-encoding header)
-     :ssl-client-cert    (first (http/certs req))
+     :ssl-client-cert    (first (.peerCertificateChain req))
      :body               (ByteArrayInputStream. (buf/get-bytes data))}))
 
 (defn- request-handler
