@@ -7,7 +7,7 @@
                  [io.vertx/clojure-api "0.2.0"]]
 
   ;;:plugins [lein-vertx "0.2.0-SNAPSHOT"]
-  :plugins [[lein-localrepo "0.5.2"]]
+
   :profiles
   {:dev {:dependencies [[org.clojure/clojure "1.5.1"]
                         [compojure "1.1.5"]
