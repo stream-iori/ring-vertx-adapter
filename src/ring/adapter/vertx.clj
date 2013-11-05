@@ -10,11 +10,13 @@
             [clojure.string :as string]))
 
 (defn- get-headers
-  "Creates a name/value map of all the request headers."
+  "Creates a name/value map of all the request headers.
+   We also replace the \n with ''"
   [req]
   (let [headers (.headers req)]
     (into {} (for [m (.entries headers)]
-               {(key m) (string/split (val m) #",")}))))
+               {(key m)
+                (map #(string/replace % "'\n'" "") (string/split (val m) #","))}))))
 
 (defn set-status
   "Update a HttpServerResponse with a status code."
@@ -52,15 +54,13 @@
    (throw (Exception. ^String (format "Unrecognized body: %s" body)))))
 
 (defn- get-content-type
-  "Get the content type from header.
-   TODO:i am not sure whether is suitable."
+  "Get the content type from header."
   [header]
   (let [ct (first (get header "Accept"))]
     (if (nil? ct) "text/plain; charset=UTF-8" ct)))
 
 (defn- get-char-encoding
-  "Get the character encoding
-   TODO:i am not sure whether is suitable."
+  "Get the character encoding"
   [header]
   (let [e (first (get header "Accept-Language"))]
     (if (nil? e) "UTF-8" e)))
