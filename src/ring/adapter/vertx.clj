@@ -10,13 +10,11 @@
             [clojure.string :as string]))
 
 (defn- get-headers
-  "Creates a name/value map of all the request headers.
-   We also replace the \n with ''"
+  "Creates a name/value map of all the request headers."
   [req]
   (let [headers (.headers req)]
     (into {} (for [m (.entries headers)]
-               {(key m)
-                (map #(string/replace % "'\n'" "") (string/split (val m) #","))}))))
+               {(key m) (string/split (val m) #",")}))))
 
 (defn set-status
   "Update a HttpServerResponse with a status code."
