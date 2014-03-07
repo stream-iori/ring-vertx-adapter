@@ -14,7 +14,7 @@
   [req]
   (let [headers (.headers req)]
     (into {} (for [m (.entries headers)]
-               {(key m) (string/split (val m) #",")}))))
+               {(string/lower-case (key m)) (val m)}))))
 
 (defn set-status
   "Update a HttpServerResponse with a status code."
@@ -54,14 +54,15 @@
 (defn- get-content-type
   "Get the content type from header."
   [header]
-  (let [ct (first (get header "Accept"))]
-    (if (nil? ct) "text/plain; charset=UTF-8" ct)))
+  (or (get header "content-type")
+      "text/plain; charset=UTF-8"))
 
 (defn- get-char-encoding
   "Get the character encoding"
-  [header]
-  (let [e (first (get header "Accept-Language"))]
-    (if (nil? e) "UTF-8" e)))
+  [content-type]
+  (if (>= 0 (.indexOf content-type "charset"))
+    (second (string/split content-type #"="))
+    "UTF-8"))
 
 (defn- update-response
   "Update ring response to vertx response"
@@ -77,7 +78,8 @@
 (defn- build-request-map
   "Return ring request with Vertx's Web parameter"
   [req data]
-  (let [header (get-headers req)]
+  (let [header (get-headers req)
+        content-type (get-content-type header)]
     {:server-port        (-> req (.absoluteURI) (.getPort))
      :server-name        (-> req (.absoluteURI) (.getHost))
      :remote-addr        (-> req (.remoteAddress) (.getAddress) (.getHostAddress))
@@ -86,9 +88,9 @@
      :scheme             (keyword (-> req (.absoluteURI) (.getScheme)))
      :request-method     (keyword (.toLowerCase (.method req)))
      :headers            header
-     :content-type       (get-content-type header)
+     :content-type       content-type
      :content-length     (or (.length data) nil)
-     :character-encoding (get-char-encoding header)
+     :character-encoding (get-char-encoding content-type)
      :ssl-client-cert    (first (.peerCertificateChain req))
      :body               (ByteArrayInputStream. (buf/get-bytes data))}))
 

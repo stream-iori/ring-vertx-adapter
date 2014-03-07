@@ -4,9 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[ring/ring-core "1.2.1"]
-                 [io.vertx/clojure-api "1.0.0.Beta1"]]
-
-  ;;:plugins [lein-vertx "0.2.0-SNAPSHOT"]
+                 [io.vertx/clojure-api "1.0.0.RC1"]]
 
   :profiles
   {:dev {:dependencies [[org.clojure/clojure "1.5.1"]

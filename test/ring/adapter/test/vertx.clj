@@ -1,7 +1,12 @@
 (ns ring.adapter.test.vertx
+  (:import (java.io ByteArrayInputStream))
   (:use clojure.test
-        ring.adapter.vertx)
+        ring.adapter.vertx
+        [ring.util.io :only (string-input-stream)]
+        ring.middleware.params
+        ring.middleware.cookies)
   (:require [clj-http.client :as http-client]
+            [ring.middleware.params :as ring-params]
             [vertx.embed :as vertx]
             [vertx.buffer :as buf]
             [vertx.http :as http]))
@@ -38,6 +43,41 @@
      (http/server))
   ([properties]
      (http/server properties)))
+
+
+
+(defn html-escape [string]
+  (str "<pre>" (clojure.string/escape string {\< "&lt;", \> "&gt;"}) "</pre>"))
+
+(defn format-request [name request]
+  (with-out-str
+    (println "-------------------------------")
+    (println name)
+    (clojure.pprint/pprint request)
+    (println "-------------------------------")))
+
+(defn wrap-spy [handler spyname include-body]
+  (fn [request]
+    (let [incoming (format-request (str spyname ":\n Incoming Request:") request)]
+      (println incoming)
+      (let [response (handler request)]
+        (let [r (if include-body response (assoc response :body "#<?>"))
+              outgoing (format-request (str spyname ":\n Outgoing Response Map:") r)]
+          (println outgoing)
+          (update-in response  [:body] (fn[x] (str (html-escape incoming) x  (html-escape outgoing)))))))))
+
+
+(defn handler [request]
+  {:headers {"cookie" "a=\"b=c;e=f\""}})
+
+(def app-handler
+  (-> handler
+      (wrap-spy "handler incomming" true)
+      (wrap-cookies)
+      (ring-params/wrap-params)
+      (wrap-spy "server incomming" true))
+  )
+
 
 (deftest test-run-vertx-web
   (testing "HTTP server"
